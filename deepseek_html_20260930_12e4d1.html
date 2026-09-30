@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#000000"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Phone">
+<title>Phone — Dialer</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-start: #1c1c2e;
+    --bg-mid: #0a0a0f;
+    --bg-end: #000;
+    --card-bg: rgba(28, 28, 32, 0.82);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #fff;
+    --text-secondary: rgba(255, 255, 255, 0.55);
+    --text-tertiary: rgba(255, 255, 255, 0.4);
+    --input-bg: rgba(255, 255, 255, 0.06);
+    --input-border: rgba(255, 255, 255, 0.1);
+    --input-placeholder: rgba(255, 255, 255, 0.3);
+    --input-text: #fff;
+    --blue: #0a84ff;
+    --green: #30d158;
+    --red: #ff453a;
+    --purple: #5e5ce6;
+    --divider: rgba(255, 255, 255, 0.08);
+    --modal-bg: rgba(30, 30, 34, 0.98);
+    --overlay: rgba(0, 0, 0, 0.75);
+  }
+
+  html[data-theme="light"] {
+    --bg-start: #e8ecf5;
+    --bg-mid: #f0f2f8;
+    --bg-end: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #0a0a0f;
+    --text-secondary: rgba(0, 0, 0, 0.55);
+    --text-tertiary: rgba(0, 0, 0, 0.4);
+    --input-bg: rgba(0, 0, 0, 0.04);
+    --input-border: rgba(0, 0, 0, 0.08);
+    --input-placeholder: rgba(0, 0, 0, 0.35);
+    --input-text: #0a0a0f;
+    --blue: #007aff;
+    --green: #00a63c;
+    --red: #d70015;
+    --purple: #5e5ce6;
+    --divider: rgba(0, 0, 0, 0.06);
+    --modal-bg: rgba(255, 255, 255, 0.99);
+    --overlay: rgba(0, 0, 0, 0.5);
+  }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: radial-gradient(ellipse at top, var(--bg-start) 0%, var(--bg-mid) 55%, var(--bg-end) 100%);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    transition: background 0.4s ease;
+  }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+    animation: float 14s ease-in-out infinite;
+  }
+  .orb1 { width: 340px; height: 340px; background: radial-gradient(circle, #0a84ff, #5e5ce6); top: -120px; left: -120px; }
+  .orb2 { width: 300px; height: 300px; background: radial-gradient(circle, #25d366, #128c7e); bottom: -110px; right: -110px; animation-delay: 3s; }
+  .orb3 { width: 260px; height: 260px; background: radial-gradient(circle, #64d2ff, #0a84ff); top: 45%; right: -100px; animation-delay: 6s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -50px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.95); }
+  }
+
+  .phone-app {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 480px;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+  }
+
+  /* Header */
+  .app-header {
+    padding: max(16px, env(safe-area-inset-top)) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .app-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .theme-btn {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .theme-btn:active { transform: scale(0.9); }
+  .theme-btn svg {
+    width: 20px; height: 20px;
+    position: absolute;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    stroke-width: 2.2;
+  }
+  .theme-btn .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0); }
+  .theme-btn .icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+  html[data-theme="light"] .theme-btn .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+  html[data-theme="light"] .theme-btn .icon-moon { opacity: 0; transform: rotate(90deg) scale(0); }
+
+  /* Install button */
+  .install-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    border: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(10, 132, 255, 0.45);
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+  .install-btn.show { display: flex; }
+  .install-btn:active { transform: scale(0.9); }
+  .install-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.4;
+    position: relative;
+    z-index: 1;
+  }
+  .install-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 55%);
+    border-radius: 12px;
+  }
+
+  /* Search Bar */
+  .search-bar {
+    margin: 0 20px 12px;
+    padding: 12px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .search-bar:focus-within {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+  }
+  .search-bar svg {
+    width: 18px; height: 18px;
+    color: var(--text-secondary);
+    stroke-width: 2.2;
+    flex-shrink: 0;
+  }
+  .search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .search-bar input::placeholder { color: var(--input-placeholder); }
+  .search-clear {
+    width: 18px; height: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: none;
+    flex-shrink: 0;
+  }
+  .search-clear.show { display: block; }
+
+  /* Screens */
+  .screen-container {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px 100px;
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  /* DIAL PAD */
+  .dial-display {
+    padding: 12px 20px 20px;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .dial-number {
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    min-height: 42px;
+    word-break: break-all;
+    transition: font-size 0.2s;
+  }
+  .dial-number.empty {
+    font-size: 16px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .dial-name {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--blue);
+    font-weight: 500;
+    min-height: 20px;
+  }
+
+  .dialpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 12px;
+    margin: 0 auto;
+    max-width: 340px;
+  }
+  .dial-key {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text-primary);
+    user-select: none;
+  }
+  .dial-key:active {
+    transform: scale(0.92);
+    background: rgba(10, 132, 255, 0.2);
+    border-color: var(--blue);
+  }
+  .dial-key .num {
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .dial-key .letters {
+    font-size: 9px;
+    color: var(--text-secondary);
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+    font-weight: 600;
+  }
+
+  .dial-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px 12px 0;
+    max-width: 340px;
+    margin: 0 auto;
+    align-items: center;
+  }
+  .dial-action-btn {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+    color: #fff;
+    background: transparent;
+  }
+  .dial-action-btn:active { transform: scale(0.9); }
+  .dial-action-btn.call {
+    background: linear-gradient(135deg, #30d158, #00a63c);
+    box-shadow: 0 8px 24px rgba(48, 209, 88, 0.4);
+  }
+  .dial-action-btn.call svg { width: 30px; height: 30px; }
+  .dial-action-btn.add-contact {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .dial-action-btn.add-contact.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dial-action-btn.backspace {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+  }
+  .dial-action-btn svg { width: 24px; height: 24px; stroke-width: 2.2; }
+
+  /* LIST */
+  .list-section { padding-top: 4px; }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    position: relative;
+  }
+  .list-item:active { background: var(--input-bg); }
+
+  .avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar .initials { position: relative; z-index: 1; }
+
+  .list-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .list-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .list-sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .list-sub svg {
+    width: 12px; height: 12px;
+    stroke-width: 2.5;
+    flex-shrink: 0;
+  }
+  .list-sub.incoming svg { color: var(--green); }
+  .list-sub.outgoing svg { color: var(--blue); }
+  .list-sub.missed svg { color: var(--red); }
+  .list-sub .sep { opacity: 0.5; }
+
+  .list-time {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .list-time-main {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .list-time-sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .call-action-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(48, 209, 88, 0.15);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--green);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .call-action-btn:active { transform: scale(0.85); }
+  .call-action-btn svg { width: 18px; height: 18px; stroke-width: 2.2; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  .empty-state svg {
+    width: 64px; height: 64px;
+    color: var(--text-tertiary);
+    stroke-width: 1.5;
+    margin-bottom: 16px;
+  }
+  .empty-state p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .fab {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 12px 32px rgba(10, 132, 255, 0.5);
+    transition: transform 0.2s ease;
+    z-index: 20;
+  }
+  .fab:active { transform: scale(0.9); }
+  .fab svg { width: 26px; height: 26px; stroke-width: 2.4; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    background: var(--card-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-top: 1px solid var(--card-border);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    z-index: 50;
+  }
+  .nav-item {
+    background: transparent;
+    border: none;
+    padding: 10px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    font-family: inherit;
+  }
+  .nav-item:active { background: var(--input-bg); }
+  .nav-item.active { color: var(--blue); }
+  .nav-item svg {
+    width: 24px; height: 24px;
+    stroke-width: 2.2;
+  }
+  .nav-item span {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: overlayIn 0.2s ease;
+  }
+  .modal-overlay.active { display: flex; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--modal-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: modalIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: -0.3px;
+  }
+
+  .form-group { margin-bottom: 14px; position: relative; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    padding-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: 12px;
+    font-size: 16px;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  .form-group input:focus {
+    border-color: var(--blue);
+    background: rgba(10, 132, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+  }
+  .form-group input::placeholder { color: var(--input-placeholder); }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s ease;
+  }
+  .modal-btn:active { transform: scale(0.97); }
+  .modal-btn.cancel {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--input-border);
+  }
+  .modal-btn.primary {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(10, 132, 255, 0.4);
+  }
+  .modal-btn.danger {
+    background: linear-gradient(135deg, #ff453a, #d70015);
+    color: #fff;
+  }
+
+  .option-list { display: flex; flex-direction: column; gap: 4px; }
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.15s ease;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+  }
+  .option-item:active { background: rgba(10, 132, 255, 0.15); }
+  .option-item svg {
+    width: 20px; height: 20px;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+  }
+  .option-item.call svg { color: var(--green); }
+  .option-item.edit svg { color: var(--blue); }
+  .option-item.delete svg { color: var(--red); }
+  .option-item.message svg { color: var(--purple); }
+
+  /* CALL OVERLAY */
+  .call-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #1c1c2e 0%, #0a0a0f 100%);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px 24px 60px;
+    color: #fff;
+  }
+  .call-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .call-overlay-status {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+  .call-overlay-name {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: -0.5px;
+  }
+  .call-overlay-number {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+  }
+  .call-overlay-timer {
+    font-size: 22px;
+    color: rgba(255,255,255,0.9);
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 60px;
+    font-variant-numeric: tabular-nums;
+  }
+  .call-overlay-actions {
+    display: flex;
+    gap: 30px;
+    margin-top: auto;
+  }
+  .call-action-circle {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: transform 0.2s ease;
+  }
+  .call-action-circle:active { transform: scale(0.9); }
+  .call-action-circle.end {
+    background: linear-gradient(135deg, #ff453a, #d70015);
+    box-shadow: 0 12px 32px rgba(255, 69, 58, 0.5);
+  }
+  .call-action-circle svg { width: 30px; height: 30px; stroke-width: 2.2; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: 0 14px 40px rgba(10, 132, 255, 0.5);
+    z-index: 3000;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 90%;
+    text-align: center;
+    backdrop-filter: blur(20px);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: linear-gradient(135deg, #30d158, #00a63c); }
+  .toast.error { background: linear-gradient(135deg, #ff453a, #d70015); }
+
+  .toast-inline {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 3000;
+    backdrop-filter: blur(20px);
+  }
+  .toast-inline.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* PWA INSTALL BANNER */
+  .pwa-banner {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(250px);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+    border: none;
+    border-radius: 18px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 900;
+    box-shadow: 0 20px 50px rgba(10, 132, 255, 0.5);
+    transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
+    color: #fff;
+  }
+  .pwa-banner.show {
+    transform: translateX(-50%) translateY(0);
+  }
+  .pwa-banner-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .pwa-banner-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 55%);
+    border-radius: 12px;
+  }
+  .pwa-banner-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.4;
+    position: relative;
+    z-index: 1;
+  }
+  .pwa-banner-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .pwa-banner-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+    color: #fff;
+  }
+  .pwa-banner-sub {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .pwa-install-btn {
+    background: #fff;
+    color: #0a84ff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .pwa-install-btn:active { transform: scale(0.95); }
+  .pwa-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pwa-close-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
+  }
+
+  @media (max-width: 420px) {
+    .app-title { font-size: 24px; }
+    .dial-number { font-size: 28px; }
+    .dial-key .num { font-size: 22px; }
+    .dialpad-grid { gap: 10px; }
+    .install-btn, .theme-btn { width: 36px; height: 36px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="phone-app">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-title" id="appTitle">Phone</div>
+    <div class="header-actions">
+      <button class="install-btn" id="installBtn" aria-label="Install app">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+      <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SEARCH BAR -->
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="Search contacts, calls..." autocomplete="off" />
+    <svg class="search-clear" id="searchClear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screen-container">
+
+    <!-- SCREEN 1: CALL LOG -->
+    <section class="screen active" id="screenRecents">
+      <div class="list-section" id="recentsList"></div>
+    </section>
+
+    <!-- SCREEN 2: DIAL PAD -->
+    <section class="screen" id="screenDial">
+      <div class="dial-display">
+        <div class="dial-number empty" id="dialNumber">Enter number</div>
+        <div class="dial-name" id="dialName"></div>
+      </div>
+
+      <div class="dialpad-grid" id="dialpadGrid"></div>
+
+      <div class="dial-actions">
+        <button class="dial-action-btn add-contact" id="addToContactsBtn" aria-label="Add to contacts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </button>
+        <button class="dial-action-btn call" id="callBtn" aria-label="Call">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </button>
+        <button class="dial-action-btn backspace" id="backspaceBtn" aria-label="Backspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+            <line x1="18" y1="9" x2="12" y2="15"/>
+            <line x1="12" y1="9" x2="18" y2="15"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: CONTACTS -->
+    <section class="screen" id="screenContacts">
+      <div class="list-section" id="contactsList"></div>
+    </section>
+
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fabAdd" aria-label="Add Contact" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="recents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </svg>
+      <span>Calls</span>
+    </button>
+    <button class="nav-item" data-tab="dial">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="6" cy="6" r="2.5"/>
+        <circle cx="12" cy="6" r="2.5"/>
+        <circle cx="18" cy="6" r="2.5"/>
+        <circle cx="6" cy="12" r="2.5"/>
+        <circle cx="12" cy="12" r="2.5"/>
+        <circle cx="18" cy="12" r="2.5"/>
+        <circle cx="6" cy="18" r="2.5"/>
+        <circle cx="12" cy="18" r="2.5"/>
+        <circle cx="18" cy="18" r="2.5"/>
+      </svg>
+      <span>Dial Pad</span>
+    </button>
+    <button class="nav-item" data-tab="contacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Contacts</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- PWA INSTALL BANNER -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title" id="pwaTitle">Install App</div>
+    <div class="pwa-banner-sub" id="pwaSub">Add to home screen for quick access</div>
+  </div>
+  <button class="pwa-install-btn" id="pwaInstallBtn">Install</button>
+  <button class="pwa-close-btn" id="pwaCloseBtn" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
+
+<!-- ADD/EDIT CONTACT MODAL -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal">
+    <div class="modal-title" id="contactModalTitle">Add Contact</div>
+    <form id="contactForm">
+      <input type="hidden" id="editContactId" />
+      <div class="form-group">
+        <label for="cName">Name</label>
+        <input type="text" id="cName" placeholder="Contact name" required />
+      </div>
+      <div class="form-group">
+        <label for="cPhone">Phone</label>
+        <input type="tel" id="cPhone" placeholder="Mobile number" required inputmode="numeric" />
+      </div>
+      <div class="form-group">
+        <label for="cEmail">Email (optional)</label>
+        <input type="email" id="cEmail" placeholder="email@example.com" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" id="cancelContact">Cancel</button>
+        <button type="submit" class="modal-btn primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- OPTIONS MODAL -->
+<div class="modal-overlay" id="optionsModal">
+  <div class="modal">
+    <div class="modal-title" id="optionsTitle">Contact</div>
+    <div class="option-list" id="optionsList"></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn cancel" id="cancelOptions">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title" id="confirmTitle">Delete?</div>
+    <p style="color: var(--text-secondary); text-align: center; font-size: 14px; margin-bottom: 4px;" id="confirmText">
+      This action cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn cancel" id="cancelConfirm">Cancel</button>
+      <button type="button" class="modal-btn danger" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- IN-CALL OVERLAY -->
+<div class="call-overlay" id="callOverlay">
+  <div class="call-overlay-status" id="callStatus">Calling...</div>
+  <div class="call-overlay-name" id="callName">Unknown</div>
+  <div class="call-overlay-number" id="callNumber">—</div>
+  <div class="call-overlay-timer" id="callTimer">00:00</div>
+  <div class="call-overlay-actions">
+    <button class="call-action-circle end" id="endCallBtn" aria-label="End call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" transform="rotate(135 12 12)"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<div class="toast-inline" id="toastInline"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  try {
+
+    var contacts = [];
+    var callLog = [];
+    var dialNumber = '';
+    var currentTab = 'recents';
+    var searchQuery = '';
+    var callState = { active: false, timer: 0, intervalId: null, startedAt: null };
+
+    var KEY_CONTACTS = 'dialer_contacts_v1';
+    var KEY_CALLLOG = 'dialer_calllog_v1';
+
+    var themeToggle = document.getElementById('themeToggle');
+    var appTitle = document.getElementById('appTitle');
+    var searchInput = document.getElementById('searchInput');
+    var searchClear = document.getElementById('searchClear');
+    var recentsList = document.getElementById('recentsList');
+    var contactsList = document.getElementById('contactsList');
+    var dialpadGrid = document.getElementById('dialpadGrid');
+    var dialNumberEl = document.getElementById('dialNumber');
+    var dialNameEl = document.getElementById('dialName');
+    var callBtn = document.getElementById('callBtn');
+    var backspaceBtn = document.getElementById('backspaceBtn');
+    var addToContactsBtn = document.getElementById('addToContactsBtn');
+    var fabAdd = document.getElementById('fabAdd');
+    var screens = document.querySelectorAll('.screen');
+    var navItems = document.querySelectorAll('.nav-item');
+    var toastEl = document.getElementById('toast');
+    var toastInline = document.getElementById('toastInline');
+
+    var contactModal = document.getElementById('contactModal');
+    var contactForm = document.getElementById('contactForm');
+    var contactModalTitle = document.getElementById('contactModalTitle');
+    var editContactId = document.getElementById('editContactId');
+    var cName = document.getElementById('cName');
+    var cPhone = document.getElementById('cPhone');
+    var cEmail = document.getElementById('cEmail');
+    var cancelContact = document.getElementById('cancelContact');
+
+    var optionsModal = document.getElementById('optionsModal');
+    var optionsTitle = document.getElementById('optionsTitle');
+    var optionsList = document.getElementById('optionsList');
+    var cancelOptions = document.getElementById('cancelOptions');
+
+    var confirmModal = document.getElementById('confirmModal');
+    var confirmTitle = document.getElementById('confirmTitle');
+    var confirmText = document.getElementById('confirmText');
+    var confirmOk = document.getElementById('confirmOk');
+    var cancelConfirm = document.getElementById('cancelConfirm');
+
+    var callOverlay = document.getElementById('callOverlay');
+    var callStatus = document.getElementById('callStatus');
+    var callName = document.getElementById('callName');
+    var callNumber = document.getElementById('callNumber');
+    var callTimer = document.getElementById('callTimer');
+    var endCallBtn = document.getElementById('endCallBtn');
+
+    /* THEME */
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      try { localStorage.setItem('dialer_theme', t); } catch(e) {}
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t === 'light' ? '#f0f2f8' : '#000000');
+    }
+    function loadTheme() {
+      var saved = 'dark';
+      try { saved = localStorage.getItem('dialer_theme') || 'dark'; } catch(e) {}
+      applyTheme(saved);
+    }
+    themeToggle.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+      if (navigator.vibrate) navigator.vibrate(10);
+    });
+    loadTheme();
+
+    /* TOAST */
+    function showToast(msg, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast';
+      if (type === 'success') toastEl.classList.add('success');
+      if (type === 'error') toastEl.classList.add('error');
+      toastEl.classList.add('show');
+      setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+    }
+
+    function showToastInline(msg) {
+      toastInline.textContent = msg;
+      toastInline.classList.add('show');
+      clearTimeout(window._ti);
+      window._ti = setTimeout(function () { toastInline.classList.remove('show'); }, 1800);
+    }
+
+    /* STORAGE */
+    function loadContacts() {
+      try {
+        var saved = localStorage.getItem(KEY_CONTACTS);
+        contacts = saved ? JSON.parse(saved) : [];
+      } catch (e) { contacts = []; }
+    }
+    function saveContacts() {
+      try { localStorage.setItem(KEY_CONTACTS, JSON.stringify(contacts)); } catch (e) {}
+    }
+    function loadCallLog() {
+      try {
+        var saved = localStorage.getItem(KEY_CALLLOG);
+        callLog = saved ? JSON.parse(saved) : [];
+      } catch (e) { callLog = []; }
+    }
+    function saveCallLog() {
+      try { localStorage.setItem(KEY_CALLLOG, JSON.stringify(callLog)); } catch (e) {}
+    }
+
+    /* HELPERS */
+    function initialsOf(name) {
+      if (!name) return '?';
+      var parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    function colorFor(str) {
+      var colors = [
+        ['#0a84ff', '#5e5ce6'],
+        ['#30d158', '#00a63c'],
+        ['#ff453a', '#d70015'],
+        ['#ff9f0a', '#ff6b00'],
+        ['#bf5af2', '#7c3aed'],
+        ['#64d2ff', '#0a84ff'],
+        ['#ff375f', '#ff2d55'],
+        ['#ffd60a', '#ff9f0a'],
+        ['#5ac8fa', '#0a84ff'],
+        ['#32d74b', '#00c7be']
+      ];
+      var sum = 0;
+      for (var i = 0; i < str.length; i++) sum += str.charCodeAt(i);
+      return colors[sum % colors.length];
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function formatDate(ts) {
+      var d = new Date(ts);
+      var now = new Date();
+      var sameDay = d.toDateString() === now.toDateString();
+      if (sameDay) return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      var yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+
+    function formatDuration(sec) {
+      if (!sec || sec < 1) return '';
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      if (m === 0) return s + 's';
+      return m + 'm ' + s + 's';
+    }
+
+    function formatTimer(sec) {
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function findContactByNumber(num) {
+      if (!num) return null;
+      var clean = String(num).replace(/\D/g, '');
+      for (var i = 0; i < contacts.length; i++) {
+        if (String(contacts[i].phone).replace(/\D/g, '') === clean) return contacts[i];
+      }
+      return null;
+    }
+
+    function findContactById(id) {
+      for (var i = 0; i < contacts.length; i++) {
+        if (String(contacts[i].id) === String(id)) return contacts[i];
+      }
+      return null;
+    }
+
+    /* TAB SWITCHING */
+    function switchTab(tab) {
+      currentTab = tab;
+      var titles = { recents: 'Recents', dial: 'Keypad', contacts: 'Contacts' };
+      appTitle.textContent = titles[tab] || 'Phone';
+      searchQuery = '';
+      searchInput.value = '';
+      searchClear.classList.remove('show');
+
+      for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+      var map = { recents: 'screenRecents', dial: 'screenDial', contacts: 'screenContacts' };
+      var target = document.getElementById(map[tab]);
+      if (target) target.classList.add('active');
+
+      for (var j = 0; j < navItems.length; j++) {
+        navItems[j].classList.toggle('active', navItems[j].getAttribute('data-tab') === tab);
+      }
+
+      fabAdd.style.display = tab === 'contacts' ? 'flex' : 'none';
+      document.querySelector('.search-bar').style.display = tab === 'dial' ? 'none' : 'flex';
+
+      if (tab === 'recents') renderRecents();
+      if (tab === 'contacts') renderContacts();
+    }
+
+    for (var i = 0; i < navItems.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          switchTab(btn.getAttribute('data-tab'));
+          if (navigator.vibrate) navigator.vibrate(8);
+        });
+      })(navItems[i]);
+    }
+
+    /* SEARCH */
+    searchInput.addEventListener('input', function () {
+      searchQuery = this.value.trim().toLowerCase();
+      searchClear.classList.toggle('show', searchQuery.length > 0);
+      if (currentTab === 'recents') renderRecents();
+      if (currentTab === 'contacts') renderContacts();
+    });
+    searchClear.addEventListener('click', function () {
+      searchInput.value = '';
+      searchQuery = '';
+      searchClear.classList.remove('show');
+      if (currentTab === 'recents') renderRecents();
+      if (currentTab === 'contacts') renderContacts();
+      searchInput.focus();
+    });
+
+    /* DIAL PAD */
+    var KEYS = [
+      { d: '1', l: '' }, { d: '2', l: 'ABC' }, { d: '3', l: 'DEF' },
+      { d: '4', l: 'GHI' }, { d: '5', l: 'JKL' }, { d: '6', l: 'MNO' },
+      { d: '7', l: 'PQRS' }, { d: '8', l: 'TUV' }, { d: '9', l: 'WXYZ' },
+      { d: '*', l: '' }, { d: '0', l: '+' }, { d: '#', l: '' }
+    ];
+
+    function buildDialpad() {
+      dialpadGrid.innerHTML = '';
+      for (var i = 0; i < KEYS.length; i++) {
+        (function (k) {
+          var btn = document.createElement('div');
+          btn.className = 'dial-key';
+          btn.innerHTML = '<div class="num">' + k.d + '</div>' + (k.l ? '<div class="letters">' + k.l + '</div>' : '');
+          btn.addEventListener('click', function () { pressKey(k.d); });
+          dialpadGrid.appendChild(btn);
+        })(KEYS[i]);
+      }
+    }
+
+    function pressKey(d) {
+      if (dialNumber.length >= 15) return;
+      dialNumber += d;
+      updateDialDisplay();
+      if (navigator.vibrate) navigator.vibrate(6);
+    }
+
+    function updateDialDisplay() {
+      if (dialNumber.length === 0) {
+        dialNumberEl.textContent = 'Enter number';
+        dialNumberEl.classList.add('empty');
+        dialNameEl.textContent = '';
+        addToContactsBtn.classList.remove('active');
+        return;
+      }
+      dialNumberEl.textContent = dialNumber;
+      dialNumberEl.classList.remove('empty');
+      var c = findContactByNumber(dialNumber);
+      if (c) {
+        dialNameEl.textContent = c.name;
+        addToContactsBtn.classList.remove('active');
+      } else {
+        dialNameEl.textContent = '';
+        addToContactsBtn.classList.add('active');
+      }
+    }
+
+    function clearDialNumber() {
+      dialNumber = '';
+      updateDialDisplay();
+    }
+
+    backspaceBtn.addEventListener('click', function () {
+      if (dialNumber.length > 0) {
+        dialNumber = dialNumber.slice(0, -1);
+        updateDialDisplay();
+      } else {
+        clearDialNumber();
+      }
+    });
+    var backspaceTimer = null;
+    backspaceBtn.addEventListener('touchstart', function () {
+      backspaceTimer = setTimeout(function () {
+        clearDialNumber();
+        showToastInline('Cleared');
+        if (navigator.vibrate) navigator.vibrate(15);
+      }, 700);
+    });
+    backspaceBtn.addEventListener('touchend', function () {
+      clearTimeout(backspaceTimer);
+    });
+
+    buildDialpad();
+    updateDialDisplay();
+
+    /* CALL BUTTON */
+    callBtn.addEventListener('click', function () {
+      if (!dialNumber) {
+        showToast('Enter a number first', 'error');
+        return;
+      }
+      startCall(dialNumber, findContactByNumber(dialNumber));
+    });
+
+    addToContactsBtn.addEventListener('click', function () {
+      if (!dialNumber) return;
+      openContactModal(null, { phone: dialNumber });
+    });
+
+    /* IN-CALL */
+    function startCall(number, contact) {
+      var clean = String(number).replace(/\s+/g, '');
+      callState.active = true;
+      callState.timer = 0;
+      callState.startedAt = Date.now();
+
+      callName.textContent = contact ? contact.name : 'Unknown';
+      callNumber.textContent = number;
+      callStatus.textContent = 'Calling...';
+      callTimer.textContent = '00:00';
+
+      callOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      addCallLog({
+        number: number,
+        name: contact ? contact.name : '',
+        type: 'outgoing',
+        duration: 0,
+        ts: Date.now()
+      });
+
+      try {
+        window.location.href = 'tel:' + clean;
+      } catch (e) {}
+
+      setTimeout(function () {
+        if (!callState.active) return;
+        callStatus.textContent = 'Connected';
+        callState.intervalId = setInterval(function () {
+          callState.timer++;
+          callTimer.textContent = formatTimer(callState.timer);
+        }, 1000);
+      }, 1500);
+    }
+
+    function endCall() {
+      if (!callState.active) return;
+      callState.active = false;
+      if (callState.intervalId) clearInterval(callState.intervalId);
+
+      if (callLog.length > 0) {
+        callLog[0].duration = callState.timer;
+        saveCallLog();
+      }
+
+      callOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+      clearDialNumber();
+
+      if (navigator.vibrate) navigator.vibrate([40, 40, 80]);
+      showToastInline('Call ended · ' + formatTimer(callState.timer));
+
+      if (currentTab === 'recents') renderRecents();
+    }
+
+    endCallBtn.addEventListener('click', endCall);
+
+    /* CALL LOG */
+    function addCallLog(entry) {
+      entry.id = 'c' + Date.now() + Math.random().toString(36).slice(2, 7);
+      callLog.unshift(entry);
+      if (callLog.length > 200) callLog = callLog.slice(0, 200);
+      saveCallLog();
+      if (currentTab === 'recents') renderRecents();
+    }
+
+    function deleteCallLog(id) {
+      callLog = callLog.filter(function (e) { return e.id !== id; });
+      saveCallLog();
+      renderRecents();
+    }
+
+    function renderRecents() {
+      var list = callLog.slice();
+      if (searchQuery) {
+        list = list.filter(function (e) {
+          var name = (e.name || '').toLowerCase();
+          var num = String(e.number || '').toLowerCase();
+          return name.indexOf(searchQuery) >= 0 || num.indexOf(searchQuery) >= 0;
+        });
+      }
+
+      if (list.length === 0) {
+        recentsList.innerHTML =
+          '<div class="empty-state">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+          '</svg>' +
+          '<p>' + (searchQuery ? 'No calls match your search' : 'No calls yet. Start dialing!') + '</p>' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        html += renderCallRow(list[i]);
+      }
+      recentsList.innerHTML = html;
+      attachCallRowHandlers();
+    }
+
+    function renderCallRow(e) {
+      var name = e.name || e.number;
+      var initials = initialsOf(name);
+      var col = colorFor(name);
+      var typeIcon;
+      if (e.type === 'incoming') {
+        typeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>';
+      } else if (e.type === 'missed') {
+        typeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>';
+      } else {
+        typeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>';
+      }
+      var typeLabel = e.type === 'incoming' ? 'Incoming' : (e.type === 'missed' ? 'Missed' : 'Outgoing');
+      var dur = e.duration ? formatDuration(e.duration) : '';
+
+      return '' +
+        '<div class="list-item call-row" data-id="' + e.id + '">' +
+          '<div class="avatar" style="background: linear-gradient(135deg, ' + col[0] + ', ' + col[1] + ');">' +
+            '<span class="initials">' + escapeHtml(initials) + '</span>' +
+          '</div>' +
+          '<div class="list-info">' +
+            '<div class="list-name">' + escapeHtml(name) + '</div>' +
+            '<div class="list-sub ' + e.type + '">' +
+              typeIcon +
+              '<span>' + typeLabel + '</span>' +
+              (dur ? '<span class="sep">·</span><span>' + dur + '</span>' : '') +
+              (e.name ? '<span class="sep">·</span><span>' + escapeHtml(e.number) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<button class="call-action-btn call-row-call" data-number="' + escapeHtml(e.number) + '" aria-label="Call back">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+            '</svg>' +
+          '</button>' +
+          '<div class="list-time">' +
+            '<div class="list-time-main">' + formatDate(e.ts) + '</div>' +
+            '<div class="list-time-sub">SIM 1</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function attachCallRowHandlers() {
+      var rows = recentsList.querySelectorAll('.call-row');
+      for (var i = 0; i < rows.length; i++) {
+        (function (row) {
+          row.addEventListener('click', function (ev) {
+            if (ev.target.closest('.call-row-call')) return;
+            var id = row.getAttribute('data-id');
+            var entry = null;
+            for (var k = 0; k < callLog.length; k++) if (callLog[k].id === id) { entry = callLog[k]; break; }
+            if (!entry) return;
+            showCallLogOptions(entry);
+          });
+        })(rows[i]);
+      }
+      var callBtns = recentsList.querySelectorAll('.call-row-call');
+      for (var j = 0; j < callBtns.length; j++) {
+        (function (btn) {
+          btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var num = btn.getAttribute('data-number');
+            startCall(num, findContactByNumber(num));
+          });
+        })(callBtns[j]);
+      }
+    }
+
+    function showCallLogOptions(entry) {
+      var contact = findContactByNumber(entry.number);
+      optionsTitle.textContent = entry.name || entry.number;
+      optionsList.innerHTML = '';
+
+      var callOpt = document.createElement('button');
+      callOpt.className = 'option-item call';
+      callOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Call back</span>';
+      callOpt.addEventListener('click', function () {
+        closeOptions();
+        startCall(entry.number, contact);
+      });
+      optionsList.appendChild(callOpt);
+
+      if (!contact) {
+        var saveOpt = document.createElement('button');
+        saveOpt.className = 'option-item edit';
+        saveOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span>Save contact</span>';
+        saveOpt.addEventListener('click', function () {
+          closeOptions();
+          openContactModal(null, { phone: entry.number });
+        });
+        optionsList.appendChild(saveOpt);
+      }
+
+      var delOpt = document.createElement('button');
+      delOpt.className = 'option-item delete';
+      delOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Delete from log</span>';
+      delOpt.addEventListener('click', function () {
+        closeOptions();
+        deleteCallLog(entry.id);
+        showToast('Removed from log', 'success');
+      });
+      optionsList.appendChild(delOpt);
+
+      optionsModal.classList.add('active');
+    }
+
+    function closeOptions() { optionsModal.classList.remove('active'); }
+    cancelOptions.addEventListener('click', closeOptions);
+    optionsModal.addEventListener('click', function (e) { if (e.target === optionsModal) closeOptions(); });
+
+    /* CONTACTS */
+    function renderContacts() {
+      var list = contacts.slice().sort(function (a, b) {
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      if (searchQuery) {
+        list = list.filter(function (c) {
+          var n = (c.name || '').toLowerCase();
+          var p = String(c.phone || '').toLowerCase();
+          var e = (c.email || '').toLowerCase();
+          return n.indexOf(searchQuery) >= 0 || p.indexOf(searchQuery) >= 0 || e.indexOf(searchQuery) >= 0;
+        });
+      }
+
+      if (list.length === 0) {
+        contactsList.innerHTML =
+          '<div class="empty-state">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>' +
+          '<circle cx="9" cy="7" r="4"/>' +
+          '<path d="M23 21v-2a4 4 0 0 0-3-3.87"/>' +
+          '<path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
+          '</svg>' +
+          '<p>' + (searchQuery ? 'No contacts match your search' : 'No contacts yet. Tap + to add one.') + '</p>' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        html += renderContactRow(list[i]);
+      }
+      contactsList.innerHTML = html;
+      attachContactRowHandlers();
+    }
+
+    function renderContactRow(c) {
+      var initials = initialsOf(c.name);
+      var col = colorFor(c.name + c.phone);
+      return '' +
+        '<div class="list-item contact-row" data-id="' + c.id + '">' +
+          '<div class="avatar" style="background: linear-gradient(135deg, ' + col[0] + ', ' + col[1] + ');">' +
+            '<span class="initials">' + escapeHtml(initials) + '</span>' +
+          '</div>' +
+          '<div class="list-info">' +
+            '<div class="list-name">' + escapeHtml(c.name) + '</div>' +
+            '<div class="list-sub">' +
+              '<span>' + escapeHtml(c.phone) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="call-action-btn contact-row-call" data-number="' + escapeHtml(c.phone) + '" aria-label="Call">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+            '</svg>' +
+          '</button>' +
+        '</div>';
+    }
+
+    function attachContactRowHandlers() {
+      var rows = contactsList.querySelectorAll('.contact-row');
+      for (var i = 0; i < rows.length; i++) {
+        (function (row) {
+          row.addEventListener('click', function (ev) {
+            if (ev.target.closest('.contact-row-call')) return;
+            var id = row.getAttribute('data-id');
+            var c = findContactById(id);
+            if (c) showContactOptions(c);
+          });
+        })(rows[i]);
+      }
+      var callBtns = contactsList.querySelectorAll('.contact-row-call');
+      for (var j = 0; j < callBtns.length; j++) {
+        (function (btn) {
+          btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var num = btn.getAttribute('data-number');
+            startCall(num, findContactByNumber(num));
+          });
+        })(callBtns[j]);
+      }
+    }
+
+    function showContactOptions(c) {
+      optionsTitle.textContent = c.name;
+      optionsList.innerHTML = '';
+
+      var callOpt = document.createElement('button');
+      callOpt.className = 'option-item call';
+      callOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Call ' + escapeHtml(c.phone) + '</span>';
+      callOpt.addEventListener('click', function () {
+        closeOptions();
+        startCall(c.phone, c);
+      });
+      optionsList.appendChild(callOpt);
+
+      var msgOpt = document.createElement('button');
+      msgOpt.className = 'option-item message';
+      msgOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Send message</span>';
+      msgOpt.addEventListener('click', function () {
+        closeOptions();
+        window.location.href = 'sms:' + c.phone;
+      });
+      optionsList.appendChild(msgOpt);
+
+      var editOpt = document.createElement('button');
+      editOpt.className = 'option-item edit';
+      editOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit contact</span>';
+      editOpt.addEventListener('click', function () {
+        closeOptions();
+        openContactModal(c.id);
+      });
+      optionsList.appendChild(editOpt);
+
+      var delOpt = document.createElement('button');
+      delOpt.className = 'option-item delete';
+      delOpt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Delete contact</span>';
+      delOpt.addEventListener('click', function () {
+        closeOptions();
+        confirmDelete(c.id, c.name);
+      });
+      optionsList.appendChild(delOpt);
+
+      optionsModal.classList.add('active');
+    }
+
+    /* ADD/EDIT MODAL */
+    function openContactModal(id, prefill) {
+      if (id) {
+        var c = findContactById(id);
+        if (!c) return;
+        contactModalTitle.textContent = 'Edit Contact';
+        editContactId.value = c.id;
+        cName.value = c.name || '';
+        cPhone.value = c.phone || '';
+        cEmail.value = c.email || '';
+      } else {
+        contactModalTitle.textContent = 'Add Contact';
+        editContactId.value = '';
+        cName.value = '';
+        cPhone.value = (prefill && prefill.phone) ? prefill.phone : '';
+        cEmail.value = '';
+      }
+      contactModal.classList.add('active');
+      setTimeout(function () { cName.focus(); }, 250);
+    }
+
+    function closeContactModal() {
+      contactModal.classList.remove('active');
+      contactForm.reset();
+      editContactId.value = '';
+    }
+
+    cancelContact.addEventListener('click', closeContactModal);
+    contactModal.addEventListener('click', function (e) { if (e.target === contactModal) closeContactModal(); });
+
+    cPhone.addEventListener('input', function () {
+      this.value = this.value.replace(/[^\d+]/g, '');
+    });
+
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = cName.value.trim();
+      var phone = cPhone.value.trim();
+      var email = cEmail.value.trim();
+      if (!name || !phone) {
+        showToast('Name and phone required', 'error');
+        return;
+      }
+
+      var id = editContactId.value;
+      if (id) {
+        var c = findContactById(id);
+        if (c) { c.name = name; c.phone = phone; c.email = email; }
+        showToast('Contact updated', 'success');
+      } else {
+        contacts.push({
+          id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
+          name: name,
+          phone: phone,
+          email: email
+        });
+        showToast('Contact saved', 'success');
+      }
+      saveContacts();
+      closeContactModal();
+      if (currentTab === 'contacts') renderContacts();
+      updateDialDisplay();
+    });
+
+    fabAdd.addEventListener('click', function () {
+      openContactModal(null, { phone: dialNumber || '' });
+    });
+
+    /* DELETE CONFIRM */
+    var pendingDeleteId = null;
+    function confirmDelete(id, name) {
+      pendingDeleteId = id;
+      confirmTitle.textContent = 'Delete ' + name + '?';
+      confirmText.textContent = 'This contact will be permanently removed.';
+      confirmModal.classList.add('active');
+    }
+    cancelConfirm.addEventListener('click', function () {
+      confirmModal.classList.remove('active');
+      pendingDeleteId = null;
+    });
+    confirmModal.addEventListener('click', function (e) {
+      if (e.target === confirmModal) {
+        confirmModal.classList.remove('active');
+        pendingDeleteId = null;
+      }
+    });
+    confirmOk.addEventListener('click', function () {
+      if (pendingDeleteId) {
+        contacts = contacts.filter(function (c) { return c.id !== pendingDeleteId; });
+        saveContacts();
+        renderContacts();
+        showToast('Contact deleted', 'success');
+      }
+      confirmModal.classList.remove('active');
+      pendingDeleteId = null;
+    });
+
+    /* PWA INSTALL */
+    var deferredPrompt = null;
+    var installBtn = document.getElementById('installBtn');
+    var pwaBanner = document.getElementById('pwaBanner');
+    var pwaInstallBtn = document.getElementById('pwaInstallBtn');
+    var pwaCloseBtn = document.getElementById('pwaCloseBtn');
+    var pwaTitle = document.getElementById('pwaTitle');
+    var pwaSub = document.getElementById('pwaSub');
+
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    function showInstallUI() {
+      if (isStandalone) return;
+      installBtn.classList.add('show');
+      var dismissed = false;
+      try { dismissed = localStorage.getItem('dialer_pwa_dismissed') === '1'; } catch (e) {}
+      if (!dismissed) {
+        setTimeout(function () { pwaBanner.classList.add('show'); }, 2000);
+      }
+    }
+
+    function hideInstallUI() {
+      installBtn.classList.remove('show');
+      pwaBanner.classList.remove('show');
+    }
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallUI();
+    });
+
+    if (isIOS && !isStandalone) {
+      installBtn.classList.add('show');
+      try {
+        if (localStorage.getItem('dialer_pwa_dismissed') !== '1') {
+          setTimeout(function () {
+            pwaTitle.textContent = 'Install on iPhone';
+            pwaSub.textContent = 'Tap Share → Add to Home Screen';
+            pwaInstallBtn.textContent = 'How?';
+            pwaBanner.classList.add('show');
+          }, 2000);
+        }
+      } catch (e) {}
+    }
+
+    function triggerInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function (choice) {
+          if (choice.outcome === 'accepted') {
+            showToast('App installed!', 'success');
+            hideInstallUI();
+          } else {
+            showToast('Install cancelled', 'error');
+          }
+          deferredPrompt = null;
+        });
+      } else if (isIOS) {
+        showToast('Tap Share → Add to Home Screen', 'info');
+      } else {
+        showToast('Install from browser menu', 'info');
+      }
+    }
+
+    installBtn.addEventListener('click', triggerInstall);
+    pwaInstallBtn.addEventListener('click', triggerInstall);
+
+    pwaCloseBtn.addEventListener('click', function () {
+      pwaBanner.classList.remove('show');
+      try { localStorage.setItem('dialer_pwa_dismissed', '1'); } catch (e) {}
+    });
+
+    window.addEventListener('appinstalled', function () {
+      hideInstallUI();
+      showToast('App installed successfully!', 'success');
+    });
+
+    /* SEED DEMO DATA */
+    function seedDemoData() {
+      try {
+        if (localStorage.getItem('dialer_seeded') === '1') return;
+        localStorage.setItem('dialer_seeded', '1');
+
+        if (contacts.length === 0) {
+          contacts = [
+            { id: 'p1', name: 'Mom',    phone: '9876543210', email: '' },
+            { id: 'p2', name: 'Dad',    phone: '9876543211', email: '' },
+            { id: 'p3', name: 'Rahul',  phone: '9876543212', email: 'rahul@example.com' },
+            { id: 'p4', name: 'Priya',  phone: '9876543213', email: '' },
+            { id: 'p5', name: 'Office', phone: '9876543214', email: 'work@example.com' }
+          ];
+          saveContacts();
+        }
+
+        if (callLog.length === 0) {
+          var now = Date.now();
+          callLog = [
+            { id: 'c1', number: '9876543210', name: 'Mom',    type: 'incoming', duration: 125, ts: now - 1000 * 60 * 30 },
+            { id: 'c2', number: '9876543212', name: 'Rahul',  type: 'missed',   duration: 0,   ts: now - 1000 * 60 * 120 },
+            { id: 'c3', number: '9876543214', name: 'Office', type: 'outgoing', duration: 340, ts: now - 1000 * 60 * 60 * 5 },
+            { id: 'c4', number: '9876543213', name: 'Priya',  type: 'incoming', duration: 65,  ts: now - 1000 * 60 * 60 * 26 }
+          ];
+          saveCallLog();
+        }
+      } catch (e) {}
+    }
+
+    /* INIT */
+    loadContacts();
+    loadCallLog();
+    seedDemoData();
+    switchTab('recents');
+
+    console.log('Phone Dialer ready');
+
+  } catch (err) {
+    console.error('App error:', err);
+  }
+})();
+</script>
+
+</body>
+</html>
