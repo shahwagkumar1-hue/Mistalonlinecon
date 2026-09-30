@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#000000"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Contact">
+<title>Contact — Send Message</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-start: #1c1c2e;
+    --bg-mid: #0a0a0f;
+    --bg-end: #000;
+    --card-bg: rgba(28, 28, 32, 0.78);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-shadow: rgba(0, 0, 0, 0.7);
+    --text-primary: #fff;
+    --text-secondary: rgba(255, 255, 255, 0.55);
+    --text-tertiary: rgba(255, 255, 255, 0.4);
+    --text-label: rgba(255, 255, 255, 0.75);
+    --input-bg: rgba(255, 255, 255, 0.06);
+    --input-border: rgba(255, 255, 255, 0.1);
+    --input-placeholder: rgba(255, 255, 255, 0.3);
+    --input-text: #fff;
+    --modal-card: rgba(44, 44, 48, 0.85);
+    --modal-border: rgba(255, 255, 255, 0.08);
+    --modal-header-bg: rgba(255, 255, 255, 0.03);
+    --modal-header-border: rgba(255, 255, 255, 0.1);
+    --modal-item-border: rgba(255, 255, 255, 0.08);
+    --modal-item-active: rgba(255, 255, 255, 0.08);
+    --modal-text-primary: #fff;
+    --modal-text-secondary: rgba(255, 255, 255, 0.5);
+    --action-blue: #0a84ff;
+    --info-bg: rgba(10, 132, 255, 0.08);
+    --info-text: rgba(255, 255, 255, 0.7);
+    --info-accent: #64d2ff;
+    --grid-line: rgba(255, 255, 255, 0.025);
+    --orb-opacity: 0.55;
+  }
+
+  html[data-theme="light"] {
+    --bg-start: #e8ecf5;
+    --bg-mid: #f0f2f8;
+    --bg-end: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(0, 0, 0, 0.08);
+    --card-shadow: rgba(0, 0, 0, 0.15);
+    --text-primary: #0a0a0f;
+    --text-secondary: rgba(0, 0, 0, 0.55);
+    --text-tertiary: rgba(0, 0, 0, 0.4);
+    --text-label: rgba(0, 0, 0, 0.7);
+    --input-bg: rgba(0, 0, 0, 0.04);
+    --input-border: rgba(0, 0, 0, 0.08);
+    --input-placeholder: rgba(0, 0, 0, 0.35);
+    --input-text: #0a0a0f;
+    --modal-card: rgba(255, 255, 255, 0.92);
+    --modal-border: rgba(0, 0, 0, 0.08);
+    --modal-header-bg: rgba(0, 0, 0, 0.02);
+    --modal-header-border: rgba(0, 0, 0, 0.08);
+    --modal-item-border: rgba(0, 0, 0, 0.06);
+    --modal-item-active: rgba(0, 0, 0, 0.05);
+    --modal-text-primary: #0a0a0f;
+    --modal-text-secondary: rgba(0, 0, 0, 0.5);
+    --action-blue: #007aff;
+    --info-bg: rgba(0, 122, 255, 0.08);
+    --info-text: rgba(0, 0, 0, 0.7);
+    --info-accent: #007aff;
+    --grid-line: rgba(0, 0, 0, 0.03);
+    --orb-opacity: 0.35;
+  }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body { min-height: 100vh; overflow-x: hidden; }
+
+  body {
+    background: radial-gradient(ellipse at top, var(--bg-start) 0%, var(--bg-mid) 55%, var(--bg-end) 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 15px;
+    min-height: 100vh;
+    transition: background 0.4s ease;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px; right: 20px;
+    z-index: 500;
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+    font-size: 20px;
+  }
+  .theme-toggle:active { transform: scale(0.9); }
+  .theme-toggle .icon-sun,
+  .theme-toggle .icon-moon {
+    position: absolute;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0); }
+  .theme-toggle .icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+  html[data-theme="light"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+  html[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0); }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: var(--orb-opacity);
+    pointer-events: none;
+    z-index: 0;
+    animation: float 14s ease-in-out infinite;
+    transition: opacity 0.4s ease;
+  }
+  .orb1 { width: 340px; height: 340px; background: radial-gradient(circle, #0a84ff, #5e5ce6); top: -120px; left: -120px; }
+  .orb2 { width: 300px; height: 300px; background: radial-gradient(circle, #25d366, #128c7e); bottom: -110px; right: -110px; animation-delay: 3s; }
+  .orb3 { width: 260px; height: 260px; background: radial-gradient(circle, #64d2ff, #0a84ff); top: 45%; right: -100px; animation-delay: 6s; }
+  .orb4 { width: 280px; height: 280px; background: radial-gradient(circle, #30d158, #00c7be); bottom: 18%; left: -110px; animation-delay: 9s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -50px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.95); }
+  }
+
+  .grid-overlay {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    z-index: 1;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  .container {
+    position: relative;
+    z-index: 10;
+    background: var(--card-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--card-border);
+    padding: 36px 28px 30px;
+    border-radius: 28px;
+    box-shadow:
+      0 30px 80px var(--card-shadow),
+      0 0 0 0.5px var(--card-border) inset,
+      0 1px 0 rgba(255, 255, 255, 0.12) inset;
+    width: 100%;
+    max-width: 420px;
+    animation: cardIn 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+
+  @keyframes cardIn {
+    0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .header-icon {
+    width: 72px; height: 72px;
+    margin: 0 auto 16px;
+    background: linear-gradient(180deg, #0a84ff 0%, #5e5ce6 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 12px 32px rgba(10, 132, 255, 0.5),
+      0 0 0 0.5px rgba(255,255,255,0.15) inset,
+      0 1px 0 rgba(255,255,255,0.25) inset;
+    animation: iconPulse 3s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-icon::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 55%);
+    border-radius: 20px;
+  }
+  .header-icon svg { width: 38px; height: 38px; z-index: 1; position: relative; }
+
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 12px 32px rgba(10,132,255,0.5); }
+    50% { transform: scale(1.05); box-shadow: 0 16px 44px rgba(10,132,255,0.75); }
+  }
+
+  h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.4px;
+    text-shadow: 0 2px 24px rgba(10, 132, 255, 0.4);
+    transition: color 0.4s ease;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 26px;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: color 0.4s ease;
+  }
+
+  .form-group { margin-bottom: 14px; position: relative; }
+
+  label {
+    display: block;
+    color: var(--text-label);
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 7px;
+    padding-left: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    transition: color 0.4s ease;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 14px 16px 14px 46px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: 14px;
+    font-size: 16px;
+    color: var(--input-text);
+    transition: all 0.3s ease;
+    outline: none;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input::placeholder { color: var(--input-placeholder); }
+  input:focus, select:focus {
+    border-color: #0a84ff;
+    background: rgba(10, 132, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .select-wrapper { position: relative; }
+  .select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 7px; height: 7px;
+    border-right: 2px solid var(--text-secondary);
+    border-bottom: 2px solid var(--text-secondary);
+    pointer-events: none;
+    transition: 0.3s;
+  }
+
+  select { cursor: pointer; padding-right: 44px; }
+  select option { background: var(--bg-mid); color: var(--text-primary); padding: 10px; }
+
+  .input-icon {
+    position: absolute;
+    left: 15px; top: 41px;
+    font-size: 17px;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: 0.3s;
+    z-index: 2;
+  }
+
+  button.submit {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(180deg, #0a84ff 0%, #0066dd 100%);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    box-shadow:
+      0 12px 32px rgba(10, 132, 255, 0.45),
+      0 1px 0 rgba(255,255,255,0.25) inset;
+    letter-spacing: 0.2px;
+  }
+  button.submit::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transition: 0.7s;
+  }
+  button.submit:hover::before { left: 100%; }
+  button.submit:active { transform: scale(0.97); }
+
+  .autosave-badge {
+    position: absolute;
+    top: -8px; right: 12px;
+    background: rgba(48, 209, 88, 0.15);
+    border: 1px solid rgba(48, 209, 88, 0.4);
+    color: #30d158;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  .autosave-badge.show { opacity: 1; transform: translateY(0); }
+
+  .info-box {
+    margin-top: 20px;
+    padding: 13px 15px;
+    background: var(--info-bg);
+    border-left: 3px solid #0a84ff;
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--info-text);
+    line-height: 1.55;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  .info-box strong { color: var(--info-accent); font-weight: 600; }
+
+  .owner-number {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    transition: color 0.4s ease;
+  }
+  .owner-number span { font-weight: 700; color: var(--info-accent); }
+
+  .pwa-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(200px);
+    background: var(--card-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 800;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: calc(100% - 32px);
+    width: 420px;
+  }
+  .pwa-banner.show { transform: translateX(-50%) translateY(0); }
+  .pwa-banner-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #0a84ff, #5e5ce6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 20px;
+  }
+  .pwa-banner-text { flex: 1; min-width: 0; }
+  .pwa-banner-title {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .pwa-banner-sub {
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+  .pwa-install-btn {
+    background: linear-gradient(180deg, #0a84ff, #0066dd);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+  }
+  .pwa-install-btn:active { transform: scale(0.95); }
+  .pwa-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+    font-family: inherit;
+    line-height: 1;
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0 8px 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    animation: overlayIn 0.3s ease;
+  }
+  .modal-overlay.active { display: flex; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .action-sheet {
+    width: 100%;
+    max-width: 480px;
+    animation: sheetUp 0.45s cubic-bezier(0.34, 1.3, 0.64, 1);
+    transform-origin: bottom center;
+  }
+  @keyframes sheetUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .action-card {
+    background: var(--modal-card);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 0.5px solid var(--modal-border);
+    transition: background 0.4s ease;
+  }
+
+  .action-header {
+    padding: 14px 20px 12px;
+    text-align: center;
+    border-bottom: 0.5px solid var(--modal-header-border);
+    background: var(--modal-header-bg);
+  }
+  .action-header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--modal-text-primary);
+    letter-spacing: -0.1px;
+  }
+  .action-header-sub {
+    font-size: 11.5px;
+    color: var(--modal-text-secondary);
+    margin-top: 3px;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--modal-text-primary);
+    transition: background 0.15s ease;
+    position: relative;
+    border-bottom: 0.5px solid var(--modal-item-border);
+  }
+  .action-item:last-child { border-bottom: none; }
+  .action-item:active { background: var(--modal-item-active); }
+
+  .action-item.priority { background: rgba(37, 211, 102, 0.08); }
+  .action-item.priority::before {
+    content: 'BEST';
+    position: absolute;
+    top: 50%;
+    right: 60px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 10px rgba(37, 211, 102, 0.4);
+  }
+
+  .action-icon {
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow:
+      0 3px 8px rgba(0,0,0,0.35),
+      0 0 0 0.5px rgba(255,255,255,0.12) inset,
+      0 1px 0 rgba(255,255,255,0.2) inset;
+    position: relative;
+    overflow: hidden;
+  }
+  .action-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 55%);
+    border-radius: 11px;
+    pointer-events: none;
+  }
+  .action-icon svg {
+    width: 24px; height: 24px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  }
+
+  .icon-messages  { background: linear-gradient(180deg, #6ee86e 0%, #00c400 100%); }
+  .icon-whatsapp  { background: linear-gradient(180deg, #4ce06a 0%, #25d366 55%, #128c7e 100%); }
+  .icon-mail      { background: linear-gradient(180deg, #5ac8fa 0%, #0a84ff 100%); }
+  .icon-telegram  { background: linear-gradient(180deg, #3fb8ff 0%, #229ed9 100%); }
+  .icon-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+  .icon-share     { background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%); }
+  .icon-copy      { background: linear-gradient(180deg, #94a3b8 0%, #475569 100%); }
+
+  .action-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+  .action-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--modal-text-primary);
+    letter-spacing: -0.2px;
+  }
+  .action-desc {
+    font-size: 12px;
+    color: var(--modal-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-arrow {
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--modal-text-secondary);
+    border-bottom: 2px solid var(--modal-text-secondary);
+    transform: rotate(-45deg);
+    flex-shrink: 0;
+    margin-right: 4px;
+    opacity: 0.5;
+  }
+
+  .cancel-action {
+    width: 100%;
+    background: var(--modal-card);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 0.5px solid var(--modal-border);
+    border-radius: 16px;
+    padding: 16px;
+    color: var(--action-blue);
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: -0.2px;
+    transition: background 0.15s ease;
+  }
+  .cancel-action:active { background: var(--modal-item-active); }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    background: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 14px 40px rgba(10, 132, 255, 0.5);
+    z-index: 2000;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 90%;
+    text-align: center;
+    backdrop-filter: blur(20px);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: linear-gradient(135deg, #30d158, #00a63c); box-shadow: 0 14px 40px rgba(48, 209, 88, 0.5); }
+  .toast.error { background: linear-gradient(135deg, #ff453a, #d70015); box-shadow: 0 14px 40px rgba(255, 69, 58, 0.5); }
+
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .success-overlay.active { display: flex; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .success-content {
+    text-align: center;
+    animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .checkmark-circle {
+    width: 120px; height: 120px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #30d158, #00a63c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 20px 60px rgba(48, 209, 88, 0.5),
+      0 0 0 0.5px rgba(255,255,255,0.2) inset,
+      0 2px 0 rgba(255,255,255,0.3) inset;
+    position: relative;
+    animation: circlePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes circlePop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .checkmark-circle::before,
+  .checkmark-circle::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid #30d158;
+    inset: -10px;
+    animation: ripple 2s ease-out infinite;
+  }
+  .checkmark-circle::after { animation-delay: 1s; }
+  @keyframes ripple {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .checkmark-circle svg {
+    width: 60px; height: 60px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .checkmark-circle svg path {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: drawCheck 0.6s ease 0.3s forwards;
+  }
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+  .success-title {
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .success-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .success-btn {
+    background: linear-gradient(180deg, #30d158 0%, #00a63c 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow:
+      0 12px 32px rgba(48, 209, 88, 0.5),
+      0 1px 0 rgba(255,255,255,0.3) inset;
+    transition: transform 0.2s ease;
+    letter-spacing: 0.2px;
+  }
+  .success-btn:active { transform: scale(0.95); }
+
+  .confetti {
+    position: fixed;
+    width: 10px; height: 10px;
+    top: -20px;
+    z-index: 2999;
+    pointer-events: none;
+    animation: confettiFall 3s linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 420px) {
+    .container { padding: 32px 22px 26px; border-radius: 24px; }
+    h2 { font-size: 21px; }
+    .header-icon { width: 64px; height: 64px; border-radius: 18px; }
+    .header-icon svg { width: 32px; height: 32px; }
+    .action-icon { width: 40px; height: 40px; border-radius: 10px; }
+    .action-icon svg { width: 22px; height: 22px; }
+    .action-title { font-size: 15px; }
+    .action-desc { font-size: 11.5px; }
+    .action-item { padding: 11px 18px; gap: 12px; }
+    .action-header { padding: 12px 18px 10px; }
+    .checkmark-circle { width: 100px; height: 100px; }
+    .checkmark-circle svg { width: 50px; height: 50px; }
+    .success-title { font-size: 22px; }
+    .theme-toggle { width: 40px; height: 40px; top: 14px; right: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .header-icon, .checkmark-circle::before, .checkmark-circle::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="icon-moon">🌙</span>
+  <span class="icon-sun">☀️</span>
+</button>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="orb orb4"></div>
+<div class="grid-overlay"></div>
+
+<div class="container">
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  </div>
+  <h2>Get In Touch</h2>
+  <p class="subtitle">Fill your details and reach us</p>
+
+  <form id="contactForm" style="position: relative;">
+    <div class="autosave-badge" id="autosaveBadge">💾 Saved</div>
+
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" placeholder="Your full name" required autocomplete="name" />
+      <span class="input-icon">👤</span>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required autocomplete="email" />
+      <span class="input-icon">📧</span>
+    </div>
+
+    <div class="form-group">
+      <label for="mobile">Mobile</label>
+      <input type="tel" id="mobile" placeholder="10-digit mobile number"
+             pattern="[6-9]{1}[0-9]{9}" maxlength="10" required autocomplete="tel" inputmode="numeric" />
+      <span class="input-icon">📱</span>
+    </div>
+
+    <div class="form-group">
+      <label for="purpose">Purpose</label>
+      <div class="select-wrapper">
+        <select id="purpose" required>
+          <option value="Enquiry">💬 General Enquiry</option>
+          <option value="Order">🛒 Place an Order</option>
+          <option value="Support">🛠️ Support / Help</option>
+          <option value="Feedback">⭐ Feedback / Review</option>
+          <option value="Complaint">⚠️ Complaint</option>
+          <option value="Business">🤝 Business / Partnership</option>
+          <option value="Other">📌 Other</option>
+        </select>
+      </div>
+      <span class="input-icon">🎯</span>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">
+      <span>📨</span>
+      <span>Continue</span>
+    </button>
+  </form>
+
+  <div class="info-box">
+    <strong>📌 Tip:</strong> WhatsApp is the fastest way. Your data is auto-saved for next time.
+  </div>
+
+  <p class="owner-number">Reach us at <span>+91 9150150041</span></p>
+</div>
+
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">📱</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">Install App</div>
+    <div class="pwa-banner-sub">Add to home screen for quick access</div>
+  </div>
+  <button class="pwa-install-btn" id="pwaInstallBtn">Install</button>
+  <button class="pwa-close-btn" id="pwaCloseBtn">×</button>
+</div>
+
+<div class="modal-overlay" id="appModal">
+  <div class="action-sheet">
+    <div class="action-card">
+      <div class="action-header">
+        <div class="action-header-title">Send your details via</div>
+        <div class="action-header-sub">All info pre-filled • Just tap Send</div>
+      </div>
+
+      <div class="action-item priority" id="openWhatsApp">
+        <div class="action-icon icon-whatsapp">
+          <svg viewBox="0 0 24 24" fill="white">
+            <path d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.3.2-.6.1c-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1s0-.5.1-.6c.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5s0-.4 0-.5c-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">WhatsApp</div>
+          <div class="action-desc">Fastest — chat with +91 9150150041</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openSms">
+        <div class="action-icon icon-messages">
+          <svg viewBox="0 0 24 24" fill="white">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Messages</div>
+          <div class="action-desc">Send SMS to +91 9150150041</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openEmail">
+        <div class="action-icon icon-mail">
+          <svg viewBox="0 0 24 24" fill="white">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Email</div>
+          <div class="action-desc">Send to mistalonline@gmail.com</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openTelegram">
+        <div class="action-icon icon-telegram">
+          <svg viewBox="0 0 24 24" fill="white">
+            <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Telegram</div>
+          <div class="action-desc">Message @Bablu2124</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openInstagram">
+        <div class="action-icon icon-instagram">
+          <svg viewBox="0 0 24 24" fill="white">
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.13 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.66-.67 1.07-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13-.67-.66-1.34-1.07-2.13-1.38-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/>
+            <path d="M12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zM12 16a4 4 0 110-8 4 4 0 010 8z"/>
+            <circle cx="18.41" cy="5.59" r="1.44"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Instagram</div>
+          <div class="action-desc">DM @aditya_sayz_07 (message copied)</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openShare">
+        <div class="action-icon icon-share">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Share</div>
+          <div class="action-desc">Any app on your phone</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+
+      <div class="action-item" id="openCopy">
+        <div class="action-icon icon-copy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </div>
+        <div class="action-text">
+          <div class="action-title">Copy Message</div>
+          <div class="action-desc">Paste anywhere you want</div>
+        </div>
+        <div class="action-arrow"></div>
+      </div>
+    </div>
+
+    <button class="cancel-action" id="cancelBtn">Cancel</button>
+  </div>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+  <div class="success-content">
+    <div class="checkmark-circle">
+      <svg viewBox="0 0 52 52" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 27l8 8 16-16"/>
+      </svg>
+    </div>
+    <div class="success-title">Message Ready!</div>
+    <div class="success-sub" id="successSub">App khul gaya hai. Bas Send dabayein!</div>
+    <button class="success-btn" id="successBtn">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  try {
+
+    var CONFIG = {
+      OWNER_PHONE: "919150150041",
+      OWNER_EMAIL: "mistalonline@gmail.com",
+      TELEGRAM_USER: "Bablu2124",
+      INSTAGRAM_USER: "aditya_sayz_07",
+      INSTAGRAM_URL: "https://www.instagram.com/aditya_sayz_07"
+    };
+
+    var form = document.getElementById('contactForm');
+    var appModal = document.getElementById('appModal');
+    var cancelBtn = document.getElementById('cancelBtn');
+    var toast = document.getElementById('toast');
+    var successOverlay = document.getElementById('successOverlay');
+    var successBtn = document.getElementById('successBtn');
+    var successSub = document.getElementById('successSub');
+    var autosaveBadge = document.getElementById('autosaveBadge');
+    var themeToggle = document.getElementById('themeToggle');
+
+    var userData = {};
+
+    /* ============ THEME ============ */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('theme', theme); } catch(e) {}
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', theme === 'light' ? '#f0f2f8' : '#000000');
+    }
+    function loadTheme() {
+      var saved = 'dark';
+      try { saved = localStorage.getItem('theme') || 'dark'; } catch(e) {}
+      applyTheme(saved);
+    }
+    themeToggle.addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+      if (navigator.vibrate) navigator.vibrate(10);
+    });
+    loadTheme();
+
+    /* ============ TOAST ============ */
+    function showToast(msg, type) {
+      toast.textContent = msg;
+      toast.className = 'toast';
+      if (type === 'success') toast.classList.add('success');
+      if (type === 'error') toast.classList.add('error');
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+
+    /* ============ AUTO-SAVE ============ */
+    function autoSave() {
+      try {
+        var data = {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          mobile: document.getElementById('mobile').value.trim(),
+          purpose: document.getElementById('purpose').value
+        };
+        localStorage.setItem('contactFormData', JSON.stringify(data));
+        autosaveBadge.classList.add('show');
+        clearTimeout(window._autosaveTimer);
+        window._autosaveTimer = setTimeout(function() {
+          autosaveBadge.classList.remove('show');
+        }, 1500);
+      } catch(e) {}
+    }
+    function loadSaved() {
+      try {
+        var saved = localStorage.getItem('contactFormData');
+        if (saved) {
+          var data = JSON.parse(saved);
+          if (data.name) document.getElementById('name').value = data.name;
+          if (data.email) document.getElementById('email').value = data.email;
+          if (data.mobile) document.getElementById('mobile').value = data.mobile;
+          if (data.purpose) document.getElementById('purpose').value = data.purpose;
+        }
+      } catch(e) {}
+    }
+    ['name', 'email', 'mobile'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', autoSave);
+    });
+    document.getElementById('purpose').addEventListener('change', autoSave);
+    loadSaved();
+
+    /* ============ MOBILE INPUT ============ */
+    document.getElementById('mobile').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+
+    /* ============ MESSAGE ============ */
+    function buildMessage() {
+      return '📌 ' + userData.purpose + ' — New Contact\n' +
+        '─────────────────\n' +
+        'Name    : ' + userData.name + '\n' +
+        'Email   : ' + userData.email + '\n' +
+        'Mobile  : ' + userData.mobile + '\n' +
+        'Purpose : ' + userData.purpose + '\n' +
+        '─────────────────\n' +
+        'Time    : ' + new Date().toLocaleString('en-IN');
+    }
+
+    /* ============ FORM SUBMIT ============ */
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var mobile = document.getElementById('mobile').value.trim();
+      var purpose = document.getElementById('purpose').value;
+
+      if (!name || !email || !mobile) {
+        showToast('⚠️ Please fill all fields', 'error');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('⚠️ Please enter a valid email', 'error');
+        return;
+      }
+      if (!/^[6-9]\d{9}$/.test(mobile)) {
+        showToast('⚠️ Please enter a valid 10-digit mobile', 'error');
+        return;
+      }
+
+      userData = { name: name, email: email, mobile: mobile, purpose: purpose };
+      if (navigator.vibrate) navigator.vibrate(15);
+      openChooser();
+    });
+
+    /* ============ MODAL ============ */
+    function openChooser() {
+      appModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      appModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    cancelBtn.addEventListener('click', closeModal);
+    appModal.addEventListener('click', function(e) {
+      if (e.target === appModal) closeModal();
+    });
+
+    /* ============ SUCCESS ANIMATION ============ */
+    function showSuccess(sub) {
+      successSub.textContent = sub || 'App khul gaya hai. Bas Send dabayein!';
+      successOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      if (navigator.vibrate) navigator.vibrate([30, 30, 60]);
+      createConfetti();
+    }
+    function hideSuccess() {
+      successOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    successBtn.addEventListener('click', hideSuccess);
+
+    function createConfetti() {
+      var colors = ['#30d158', '#0a84ff', '#ff375f', '#ffd60a', '#5e5ce6', '#64d2ff'];
+      for (var i = 0; i < 40; i++) {
+        (function(idx) {
+          setTimeout(function() {
+            var c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + 'vw';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.width = (6 + Math.random() * 8) + 'px';
+            c.style.height = c.style.width;
+            c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            c.style.animationDuration = (2 + Math.random() * 2) + 's';
+            document.body.appendChild(c);
+            setTimeout(function() { c.remove(); }, 4500);
+          }, idx * 30);
+        })(i);
+      }
+    }
+
+    /* ============ CLIPBOARD ============ */
+    function copyText(text) {
+      return new Promise(function(resolve) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(function() { resolve(true); })
+            .catch(function() { resolve(fallbackCopy(text)); });
+        } else {
+          resolve(fallbackCopy(text));
+        }
+      });
+    }
+    function fallbackCopy(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch(e) { return false; }
+    }
+
+    /* ============ WHATSAPP ============ */
+    function openWhatsApp() {
+      var msg = encodeURIComponent(buildMessage());
+      closeModal();
+      setTimeout(function() {
+        try {
+          window.location.href = 'whatsapp://send?phone=' + CONFIG.OWNER_PHONE + '&text=' + msg;
+        } catch(e) {
+          window.location.href = 'https://wa.me/' + CONFIG.OWNER_PHONE + '?text=' + msg;
+        }
+        setTimeout(function() { showSuccess('WhatsApp khul gaya! Bas Send dabayein.'); }, 800);
+      }, 150);
+    }
+
+    /* ============ SMS ============ */
+    function openSMS() {
+      var msg = encodeURIComponent(buildMessage());
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      var url = isIOS ? 'sms:' + CONFIG.OWNER_PHONE + '&body=' + msg : 'sms:' + CONFIG.OWNER_PHONE + '?body=' + msg;
+      closeModal();
+      setTimeout(function() {
+        window.location.href = url;
+        setTimeout(function() { showSuccess('SMS app khul gaya! Bas Send dabayein.'); }, 800);
+      }, 150);
+    }
+
+    /* ============ EMAIL ============ */
+    function openEmail() {
+      var sub = encodeURIComponent('[' + userData.purpose + '] New Contact from ' + userData.name);
+      var body = encodeURIComponent(
+        'Purpose: ' + userData.purpose + '\n\n' +
+        'Name  : ' + userData.name + '\n' +
+        'Email : ' + userData.email + '\n' +
+        'Mobile: ' + userData.mobile + '\n' +
+        'Time  : ' + new Date().toLocaleString('en-IN') + '\n'
+      );
+      closeModal();
+      setTimeout(function() {
+        window.location.href = 'mailto:' + CONFIG.OWNER_EMAIL + '?subject=' + sub + '&body=' + body;
+        setTimeout(function() { showSuccess('Email app khul gaya! Bas Send dabayein.'); }, 800);
+      }, 150);
+    }
+
+    /* ============ TELEGRAM ============ */
+    function openTelegram() {
+      var msg = encodeURIComponent(buildMessage());
+      var nativeUrl = 'tg://resolve?domain=' + CONFIG.TELEGRAM_USER + '&text=' + msg;
+      var webUrl = 'https://t.me/' + CONFIG.TELEGRAM_USER;
+      closeModal();
+      setTimeout(function() {
+        var t = Date.now();
+        window.location.href = nativeUrl;
+        setTimeout(function() {
+          if (Date.now() - t < 2000 && !document.hidden) window.location.href = webUrl;
+        }, 1500);
+        setTimeout(function() { showSuccess('Telegram khul gaya! Bas Send dabayein.'); }, 800);
+      }, 150);
+    }
+
+    /* ============ INSTAGRAM ============ */
+    function openInstagram() {
+      copyText(buildMessage()).then(function(copied) {
+        if (copied) showToast('📋 Message copied! Paste in Instagram DM', 'success');
+        closeModal();
+        setTimeout(function() {
+          var t = Date.now();
+          window.location.href = 'instagram://user?username=' + CONFIG.INSTAGRAM_USER;
+          setTimeout(function() {
+            if (Date.now() - t < 2000 && !document.hidden) window.location.href = CONFIG.INSTAGRAM_URL;
+          }, 1500);
+          setTimeout(function() { showSuccess('Message copy ho gaya! Instagram me paste karein.'); }, 800);
+        }, 150);
+      });
+    }
+
+    /* ============ SHARE ============ */
+    function openShare() {
+      var msg = buildMessage();
+      if (navigator.share) {
+        closeModal();
+        navigator.share({ title: 'Contact — ' + userData.name, text: msg })
+          .then(function() { setTimeout(function() { showSuccess('Share ho gaya! 🎉'); }, 300); })
+          .catch(function(err) {
+            if (err && err.name !== 'AbortError') showToast('⚠️ Share failed.', 'error');
+          });
+      } else {
+        showToast('📋 Share not supported — copying message', 'info');
+        copyText(msg).then(function() { showSuccess('Message copy ho gaya! Ab paste karein.'); });
+      }
+    }
+
+    /* ============ COPY ============ */
+    function openCopy() {
+      copyText(buildMessage()).then(function(copied) {
+        closeModal();
+        if (copied) showSuccess('Message copy ho gaya! Ab kisi bhi app me paste karein.');
+        else showToast('⚠️ Copy failed. Long-press manually.', 'error');
+      });
+    }
+
+    /* ============ ATTACH ============ */
+    document.getElementById('openWhatsApp').addEventListener('click', openWhatsApp);
+    document.getElementById('openSms').addEventListener('click', openSMS);
+    document.getElementById('openEmail').addEventListener('click', openEmail);
+    document.getElementById('openTelegram').addEventListener('click', openTelegram);
+    document.getElementById('openInstagram').addEventListener('click', openInstagram);
+    document.getElementById('openShare').addEventListener('click', openShare);
+    document.getElementById('openCopy').addEventListener('click', openCopy);
+
+    /* ============ PWA ============ */
+    var deferredPrompt = null;
+    var pwaBanner = document.getElementById('pwaBanner');
+    var pwaInstallBtn = document.getElementById('pwaInstallBtn');
+    var pwaCloseBtn = document.getElementById('pwaCloseBtn');
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      try {
+        if (localStorage.getItem('pwaDismissed')) return;
+      } catch(e) {}
+      setTimeout(function() {
+        pwaBanner.classList.add('show');
+      }, 3000);
+    });
+
+    pwaInstallBtn.addEventListener('click', function() {
+      if (!deferredPrompt) {
+        showToast('Tap Share → Add to Home Screen', 'info');
+        return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(choice) {
+        pwaBanner.classList.remove('show');
+        if (choice.outcome === 'accepted') showToast('🎉 App installed!', 'success');
+        deferredPrompt = null;
+      });
+    });
+
+    pwaCloseBtn.addEventListener('click', function() {
+      pwaBanner.classList.remove('show');
+      try { localStorage.setItem('pwaDismissed', '1'); } catch(e) {}
+    });
+
+    /* ============ PARALLAX ============ */
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.addEventListener('mousemove', function(e) {
+        var x = (e.clientX / window.innerWidth - 0.5) * 20;
+        var y = (e.clientY / window.innerHeight - 0.5) * 20;
+        var orbs = document.querySelectorAll('.orb');
+        for (var i = 0; i < orbs.length; i++) {
+          var f = (i + 1) * 0.5;
+          orbs[i].style.transform = 'translate(' + (x * f) + 'px, ' + (y * f) + 'px)';
+        }
+      });
+    }
+
+    console.log('📩 Contact App Ready');
+
+  } catch(err) {
+    console.error('App error:', err);
+  }
+})();
+</script>
+
+</body>
+</html>
